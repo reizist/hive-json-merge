@@ -1,0 +1,3 @@
+{"name":"hoge","age":30,"city":"tokyo","hare":"mage"}
+{"name":"huga","age":41,"city":"chiba","hoka":"sonntaku"}
+{"name":"hige","age":26,"city":"kanagawa","nyaa":"panpi"}
