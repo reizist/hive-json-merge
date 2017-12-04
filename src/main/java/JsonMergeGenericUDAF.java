@@ -34,21 +34,14 @@ public class JsonMergeGenericUDAF extends AbstractGenericUDAFResolver {
                             + oi.getCategory().name()
                             + " was passed.");
         }
-        
-        MapObjectInspector inputOI = (MapObjectInspector) oi;
-        
         return new JsonMergeEvaluator();
     }
 
     public static class JsonMergeEvaluator extends GenericUDAFEvaluator {
-
         ObjectInspector inputOI;
         ObjectInspector outputOI;
 
         MapObjectInspector mapOI;
-        
-        Map<String, String> current_json = new HashMap<String, String>();
-
 
         // Called by Hive to initialize an instance of your UDAF evaluator class.
         @Override
@@ -58,14 +51,13 @@ public class JsonMergeGenericUDAF extends AbstractGenericUDAFResolver {
             assert (parameters.length == 1);
             super.init(m, parameters);
 
-            System.out.println(parameters[0]);
             inputOI = parameters[0];
-
             // init output object inspectors
-            outputOI = ObjectInspectorFactory.getReflectionObjectInspector(Map.class,
-                    ObjectInspectorOptions.JAVA);
+            //outputOI = ObjectInspectorFactory.getReflectionObjectInspector(Map.class,
+            //        ObjectInspectorOptions.JAVA);
+            outputOI = ObjectInspectorUtils.getStandardObjectInspector(inputOI,
+                    ObjectInspectorCopyOption.JAVA);
             return outputOI;
-
         }
 
         /**
@@ -91,8 +83,6 @@ public class JsonMergeGenericUDAF extends AbstractGenericUDAFResolver {
         	MergedJsonAgg myagg = new MergedJsonAgg();
         }
         
-        private boolean warned = false;
-
         // Process a new row of data into the aggregation buffer
         @Override
         public void iterate(AggregationBuffer agg, Object[] parameters)
@@ -113,8 +103,7 @@ public class JsonMergeGenericUDAF extends AbstractGenericUDAFResolver {
         @Override
         public Object terminatePartial(AggregationBuffer agg) throws HiveException {
             MergedJsonAgg myagg = (MergedJsonAgg) agg;
-            current_json = myagg.merge(myagg.json);
-            return current_json;
+            return myagg.json;
         }
 
         // Merge a partial aggregation returned by terminatePartial into the current aggregation
